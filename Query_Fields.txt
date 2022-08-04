@@ -1,0 +1,19 @@
+# This query is executed on https://splus.cloud/query to find the fields corresponding to the region of the clusters
+
+# What the query means:
+SELECT (columns to output)
+FROM (table where that column is)
+WHERE (condition, which is a cone search in this case. The CIRCLE part arguments are ('ICRS', RA, DEC, Degrees))
+GROUP BY (column, to select only unique values of this column)
+
+# For Hydra:
+SELECT det.field
+FROM dr3.all_dr3 as det
+WHERE 1 = CONTAINS(POINT('ICRS', det.ra, det.dec), CIRCLE('ICRS', 159.17, -27.52444, 7.882))
+GROUP BY det.field
+
+# For Abell 1644:
+SELECT det.field
+FROM dr3.all_dr3 as det
+WHERE 1 = CONTAINS(POINT('ICRS', det.ra, det.dec), CIRCLE('ICRS', 194.2986, -17.409, 3.415))
+GROUP BY det.field
