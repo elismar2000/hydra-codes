@@ -12,10 +12,10 @@ conn = splusdata.connect('elosch', '@Hydra-Kentaurus1987')
 
 # Load file containing the fields to be downloaded
 # See 'Query_Fields.txt' for how to get this file
-All_Fields   = pd.read_csv('fields.txt')
+All_Fields   = pd.read_csv('fields_hydra.csv')
 
 # Set the output folder name
-Output_Dir   = 'Fields-all_dr3/'
+Output_Dir   = 'tables_photometric/'
 
 # Create output folder if it doesn't exist
 if os.path.isdir(Output_Dir) == False:
@@ -35,16 +35,26 @@ def thread_function(dataframe):
         print('Starting '+f'{value.field}')
         try:
             # This query is for public data
-            My_Query = f"""SELECT det.*, sgq.*, zp.*
-                           FROM dr3.all_dr3 as det
-                           JOIN dr3.vac_star_galaxy_quasar as sgq ON (det.ID = sgq.ID)
-                           JOIN dr3.vac_photoz as zp ON (det.ID = zp.ID)
-                           WHERE 1 = CONTAINS( POINT('ICRS', det.ra, det.dec), CIRCLE('ICRS', 159.17, -27.524, 5*1.5744)) and det.r_auto < 21
-                           and sgq.PROB_GAL > 0.7
-                           and det.field = '{value.field}'"""
+            My_Query = f"""
+            SELECT
+            det.ID, det.SEX_FLAGS_DET, det.KRON_RADIUS, sgq.model_flag,
+            g.e_g_petro, r.e_r_petro
+
+            FROM
+            idr4_dual.idr4_detection_image AS det
+            JOIN idr4_vacs.idr4_star_galaxy_quasar AS sgq ON (det.ID = sgq.ID)
+            JOIN idr4_dual.idr4_dual_g     AS g     ON (det.ID = g.ID)
+            JOIN idr4_dual.idr4_dual_r     AS r     ON (det.ID = r.ID)
+
+
+            WHERE
+            (det.Field = '{value.field}')
+            AND (g.g_petro < 30)
+            AND (r.r_petro < 30)
+            """
 
             # Make the query
-            Result = conn.query(My_Query, publicdata=True)
+            Result = conn.query(My_Query, publicdata=False)
 
             # Save the resulting table to the output folder as a csv
             Result.write(f'{Output_Dir}{value.field}.csv') # To save the resulting table
@@ -95,5 +105,5 @@ Concat_DF = pd.concat(DFs)
 Concat_DF = Concat_DF.reset_index(drop=True)
 
 # Save to file
-Concat_DF.to_csv(Output_Dir+'Hydra.csv', index=False) # Save as a final catalogue
+Concat_DF.to_csv(Output_Dir+'Hydra_new_columns.csv', index=False) # Save as a final catalogue
 print('# Done')
