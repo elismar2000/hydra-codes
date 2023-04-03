@@ -11,4 +11,5 @@ to_play/
 CreateSpecCatalogue/
 .ipynb_checkpoints/
 Trash/
-tables_photozs/
+tables_photometric/
+tables_speczs/
