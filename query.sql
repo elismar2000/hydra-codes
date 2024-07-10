@@ -103,3 +103,25 @@ a.source_id, a.ra, a.dec, a.parallax
 FROM gaiadr3.gaia_source AS a
 
 WHERE 1 = CONTAINS( POINT('ICRS', a.ra, a.dec), CIRCLE('ICRS', 159.17, -27.524, 5*1.5744))
+
+
+#Dados do Gaia (amostra + pura de galáxias)
+SELECT
+gc.source_id
+
+FROM gaiadr3.galaxy_candidates AS gc
+
+WHERE (radius_sersic IS NOT NULL OR
+classlabel_dsc_joint='galaxy' OR
+vari_best_class_name='GALAXY')
+
+
+#Galaxias do Gaia na região de Hydra-Centaurus:
+SELECT gc.source_id, a.ra, a.dec
+
+FROM gaiadr3.galaxy_candidates AS gc
+JOIN gaiadr3.gaia_source AS a ON (a.source_id = gc.source_id)
+
+WHERE
+a.ra > 140.0 AND a.ra < 185.0 AND
+a.dec > (-50.0)AND a.dec < (-15.0)

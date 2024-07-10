@@ -15,7 +15,7 @@ conn = splusdata.connect('elosch', '@Hydra-Kentaurus1987')
 All_Fields   = pd.read_csv('fields_hydra.csv')
 
 # Set the output folder name
-Output_Dir   = 'tables_photometric/'
+Output_Dir   = 'Fields_delete/'
 
 # Create output folder if it doesn't exist
 if os.path.isdir(Output_Dir) == False:
@@ -37,15 +37,15 @@ def thread_function(dataframe):
             # This query is for public data
             My_Query = f"""
             SELECT
-            det.ID, det.SEX_FLAGS_DET, det.KRON_RADIUS, sgq.model_flag,
-            g.e_g_petro, r.e_r_petro
+            det.ID, det.RA, det.DEC, sgq.PROB_GAL, sgq.CLASS, pz.odds, pz.zml,
+            g.g_petro, r.r_petro, det.SEX_FLAGS_DET
 
             FROM
             idr4_dual.idr4_detection_image AS det
             JOIN idr4_vacs.idr4_star_galaxy_quasar AS sgq ON (det.ID = sgq.ID)
-            JOIN idr4_dual.idr4_dual_g     AS g     ON (det.ID = g.ID)
-            JOIN idr4_dual.idr4_dual_r     AS r     ON (det.ID = r.ID)
-
+            JOIN idr4_vacs.idr4_photoz AS pz ON (det.ID = pz.ID)
+            JOIN idr4_dual.idr4_dual_g 	AS g 	ON (det.ID = g.ID)
+            JOIN idr4_dual.idr4_dual_r 	AS r 	ON (det.ID = r.ID)
 
             WHERE
             (det.Field = '{value.field}')
@@ -105,5 +105,5 @@ Concat_DF = pd.concat(DFs)
 Concat_DF = Concat_DF.reset_index(drop=True)
 
 # Save to file
-Concat_DF.to_csv(Output_Dir+'Hydra_new_columns.csv', index=False) # Save as a final catalogue
+Concat_DF.to_csv(Output_Dir+'Hydra-iDR4.csv', index=False) # Save as a final catalogue
 print('# Done')
